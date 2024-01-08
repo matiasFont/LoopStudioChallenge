@@ -8,6 +8,10 @@ const App = () => {
   const [articles, setArticles] = React.useState<string[]>([]);
   const [links, setLinks] = React.useState<string[]>([]);
 
+  /**
+   * Sets the previous search value.
+   * @param value - The value to set as the previous search.
+   */
   const setPreviousSearch = (value: string) => {
     if (prevSearch.length === 10) {
       const newPrevSearch = prevSearch.slice(1);
@@ -31,14 +35,13 @@ const App = () => {
       <div className="search-box">
         <Autocomplete
           freeSolo
-          id="free-solo-2-demo"
           disableClearable
           sx={{ width: 300 }}
           options={prevSearch}
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Search input"
+              label="Search"
               InputProps={{
                 ...params.InputProps,
                 type: "search",
