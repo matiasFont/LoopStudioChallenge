@@ -1,26 +1,14 @@
-import React, { useEffect } from "react";
+import React from "react";
 import "./App.css";
-import { Autocomplete, TextField } from "@mui/material";
-import { OptionsModel } from "./models/options";
-import { MapWikiResponse, useDebounce } from "./utils/utils";
+import { Autocomplete, Link, TextField } from "@mui/material";
 import { wikiRequest } from "./requests/requests";
-import { WikiResponseMapped } from "./models/wikiResponse";
 
 const App = () => {
-  const [prevSearch, setPrevSearch] = React.useState<OptionsModel[]>([]);
-  const [req, setReq] = React.useState<WikiResponseMapped[]>([]);
-  const [inputValue, setInputValue] = React.useState<OptionsModel | null>(
-    {} as OptionsModel
-  );
-  const debouncedSearchTerm = useDebounce(inputValue, 500);
+  const [prevSearch, setPrevSearch] = React.useState<string[]>([]);
+  const [articles, setArticles] = React.useState<string[]>([]);
+  const [links, setLinks] = React.useState<string[]>([]);
 
-  useEffect(() => {
-    wikiRequest(debouncedSearchTerm).then((res) => {
-      setReq(MapWikiResponse(res));
-    });
-  }, [debouncedSearchTerm]);
-
-  const setPreviousSearch = (value: OptionsModel) => {
+  const setPreviousSearch = (value: string) => {
     if (prevSearch.length === 10) {
       const newPrevSearch = prevSearch.slice(1);
       setPrevSearch([...newPrevSearch, value]);
@@ -30,24 +18,49 @@ const App = () => {
     }
   };
 
+  const handleClick = (search: string) => {
+    wikiRequest(search).then((res) => {
+      setArticles(res[1]);
+      setLinks(res[3]);
+      setPreviousSearch(search);
+    });
+  };
+
   return (
     <div className="App">
       <div className="search-box">
         <Autocomplete
-          disablePortal
-          id="combo-box-demo"
-          options={prevSearch}
+          freeSolo
+          id="free-solo-2-demo"
+          disableClearable
           sx={{ width: 300 }}
-          renderInput={(params) => <TextField {...params} label="Movie" />}
-          value={inputValue}
-          onChange={(event: any, newValue: OptionsModel | null) => {
-            setInputValue(newValue);
-            if (newValue !== null) setPreviousSearch(newValue);
+          options={prevSearch}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Search input"
+              InputProps={{
+                ...params.InputProps,
+                type: "search",
+              }}
+            />
+          )}
+          onChange={(event: any) => {
+            handleClick(event.target.value);
           }}
         />
       </div>
       <div className="content">
-        <div className="content__options"></div>
+        <div className="content__options">
+          {articles.map((article, index) => (
+            <div>
+              <p>{`- ${article} : `}</p>
+              <Link href={links[index]} target="_blank" color="inherit">
+                {links[index]}
+              </Link>
+            </div>
+          ))}
+        </div>
         <div className="content__article"></div>
       </div>
     </div>
